@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIPER MOBILE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050505;
+            color: #ffffff;
+        }
+
+        /* --- 1. LOBBY / START SCREEN --- */
+        #lobbyScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+        }
+        .viper-badge {
+            background: rgba(234, 179, 8, 0.15);
+            border: 1px solid #eab308;
+            color: #eab308;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .game-logo {
+            font-size: 46px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #ffffff, #eab308, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(234, 179, 8, 0.2);
+            margin-bottom: 10px;
+        }
+        .game-slogan {
+            font-size: 14px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 2.5px;
+            margin-bottom: 45px;
+            text-transform: uppercase;
+        }
+        .btn-deploy {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #000000;
+            border: none;
+            padding: 16px 45px;
+            font-size: 18px;
+            font-weight: 900;
+            border-radius: 8px;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.5);
+            transition: transform 0.15s, box-shadow 0.15s;
+            text-transform: uppercase;
+        }
+        .btn-deploy:active {
+            transform: scale(0.95);
+        }
+
+        /* --- 2. IN-GAME HUD (HEADS UP DISPLAY) --- */
+        #hud {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .stat-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .hp-bar-bg {
+            width: 120px;
+            height: 10px;
+            background: #334155;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        #hpFill {
+            width: 100%;
+            height: 100%;
+            background: #22c55e;
+            transition: width 0.2s, background 0.2s;
+        }
+
+        /* Crosshair (Shabaha katikati ya skrini) */
+        .crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 24px; height: 24px;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(234, 179, 8, 0.8);
+            border-radius: 50%;
+        }
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 4px; height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* --- 3. MOBILE TOUCH CONTROLS --- */
+        .controls-area {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 20px;
+            pointer-events: auto;
+        }
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 52px);
+            grid-template-rows: repeat(3, 52px);
+            gap: 5px;
+        }
+        .ctrl-btn {
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .ctrl-btn:active {
+            background: rgba(234, 179, 8, 0.6);
+        }
+        .action-pad {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+        }
+        .look-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-fire {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ef4444, #991b1b);
+            border: 3px solid #fca5a5;
+            color: white;
+            font-weight: 900;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            cursor: pointer;
+        }
+        .btn-fire:active {
+            transform: scale(0.92);
+        }
+
+        /* --- 4. GAME OVER SCREEN --- */
+        #gameOverScreen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            text-align: center;
+        }
+        .go-title {
+            font-size: 40px;
+            font-weight: 900;
+            color: #ef4444;
+            margin-bottom: 10px;
+        }
+        .go-stats {
+            font-size: 18px;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. START / LOBBY SCREEN -->
+    <div id="lobbyScreen">
+        <div class="viper-badge">Tactical 3D Combat</div>
+        <div class="game-logo">VIPER MOBILE</div>
+        <div class="game-slogan">RULE THE BATTLE. FEAR THE VIPER.</div>
+        <button class="btn-deploy" onclick="startGame()">DEPLOY TO BATTLE</button>
+    </div>
+
+    <!-- 2. IN-GAME HUD & CONTROLS -->
+    <div id="hud">
+        <div class="top-bar">
+            <div class="stat-box">
+                <div>HP: <span id="hpText">100</span>%</div>
+                <div class="hp-bar-bg"><div id="hpFill"></div></div>
+            </div>
+            <div class="stat-box" style="color: #eab308;">
+                KILLS: <span id="killCount">0</span> | WAVE: <span id="waveCount">1</span>
+            </div>
+        </div>
+
+        <div class="crosshair"></div>
+
+        <div class="controls-area">
+            <!-- Movement D-Pad -->
+            <div class="d-pad">
+                <div></div>
+                <button class="ctrl-btn" id="btnUp">▲</button>
+                <div></div>
+                <button class="ctrl-btn" id="btnLeft">◀</button>
+                <div></div>
+                <button class="ctrl-btn" id="btnRight">▶</button>
+                <div></div>
+                <button class="ctrl-btn" id="btnDown">▼</button>
+                <div></div>
+            </div>
+
+            <!-- Aim & Fire -->
+            <div class="action-pad">
+                <div class="look-btns">
+                    <button class="ctrl-btn" style="width: 55px; height: 50px;" id="btnTurnLeft">↺</button>
+                    <button class="ctrl-btn" style="width: 55px; height: 50px;" id="btnTurnRight">↻</button>
+                </div>
+                <button class="btn-fire" onclick="shoot()">FIRE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. GAME OVER SCREEN -->
+    <div id="gameOverScreen">
+        <div class="go-title">MISSION FAILED</div>
+        <div class="go-stats">
+            Enemies Eliminated: <strong id="finalKills" style="color: #eab308;">0</strong><br>
+            Wave Reached: <strong id="finalWave" style="color: #38bdf8;">1</strong>
+        </div>
+        <button class="btn-deploy" onclick="restartGame()">REDEPLOY</button>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvasContainer"></div>
+
+    <script>
+        // --- SOUND EFFECTS ENGINE (OFFLINE WEB AUDIO) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'shoot') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } else if (type === 'hit') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            }
+        }
+
+        // --- 3D ENGINE VARIABLES ---
+        let scene, camera, renderer;
+        let bullets = [];
+        let enemies = [];
+        let obstacles = [];
+        let isPlaying = false;
+        let hp = 100;
+        let kills = 0;
+        let wave = 1;
+        let spawnTimer = 0;
+
+        // Player movement states
+        const moveState = { forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false };
+
+        function init3D() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f172a);
+            scene.fog = new THREE.FogExp2(0x0f172a, 0.025);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.8, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('canvasContainer').appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xeab308, 0.9);
+            dirLight.position.set(20, 40, 20);
+            scene.add(dirLight);
+
+            // Battleground Floor (Grid)
+            const floorGeo = new THREE.PlaneGeometry(120, 120);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            const gridHelper = new THREE.GridHelper(120, 40, 0xeab308, 0x334155);
+            scene.add(gridHelper);
+
+            // Tactical Cover / Crates in Arena
+            const boxGeo = new THREE.BoxGeometry(3, 2.5, 3);
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+            const cratePositions = [
+                [-10, 1.25, -15], [12, 1.25, -18], [-15, 1.25, 10],
+                [14, 1.25, 14], [0, 1.25, -25], [-22, 1.25, -5], [22, 1.25, 5]
+            ];
+            cratePositions.forEach(pos => {
+                const crate = new THREE.Mesh(boxGeo, boxMat);
+                crate.position.set(pos[0], pos[1], pos[2]);
+                scene.add(crate);
+                obstacles.push(crate);
+            });
+
+            // Weapon Barrel (First Person View)
+            const gunGeo = new THREE.BoxGeometry(0.15, 0.18, 0.8);
+            const gunMat = new THREE.MeshStandardMaterial({ color: 0x09090b, metalness: 0.8, roughness: 0.2 });
+            const gun = new THREE.Mesh(gunGeo, gunMat);
+            gun.position.set(0.35, -0.35, -0.6);
+            camera.add(gun);
+            scene.add(camera);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function spawnEnemy() {
+            const enemyGroup = new THREE.Group();
+
+            // Body
+            const bodyGeo = new THREE.BoxGeometry(1.2, 1.8, 0.8);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.9;
+            enemyGroup.add(body);
+
+            // Glowing Visor Eyes
+            const eyeGeo = new THREE.BoxGeometry(0.8, 0.2, 0.85);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+            const eyes = new THREE.Mesh(eyeGeo, eyeMat);
+            eyes.position.y = 1.4;
+            enemyGroup.add(eyes);
+
+            // Spawn at random distance around player
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 28 + Math.random() * 15;
+            enemyGroup.position.set(
+                camera.position.x + Math.cos(angle) * distance,
+                0,
+                camera.position.z + Math.sin(angle) * distance
+            );
+
+            scene.add(enemyGroup);
+            enemies.push({ mesh: enemyGroup, hp: 2 });
+        }
+
+        function shoot() {
+            if (!isPlaying) return;
+            playSound('shoot');
+
+            const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+
+            bullet.position.copy(camera.position);
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            bullet.position.addScaledVector(direction, 1);
+
+            scene.add(bullet);
+            bullets.push({ mesh: bullet, dir: direction, life: 60 });
+        }
+
+        function updateGame() {
+            if (!isPlaying) return;
+
+            // 1. Player Rotation & Movement
+            const moveSpeed = 0.22;
+            const rotSpeed = 0.04;
+
+            if (moveState.turnLeft) camera.rotation.y += rotSpeed;
+            if (moveState.turnRight) camera.rotation.y -= rotSpeed;
+
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            forward.y = 0;
+            forward.normalize();
+
+            const right = new THREE.Vector3();
+            right.crossVectors(forward, camera.up).normalize();
+
+            if (moveState.forward) camera.position.addScaledVector(forward, moveSpeed);
+            if (moveState.backward) camera.position.addScaledVector(forward, -moveSpeed);
+            if (moveState.right) camera.position.addScaledVector(right, moveSpeed);
+            if (moveState.left) camera.position.addScaledVector(right, -moveSpeed);
+
+            // Keep inside arena bounds
+            camera.position.x = Math.max(-50, Math.min(50, camera.position.x));
+            camera.position.z = Math.max(-50, Math.min(50, camera.position.z));
+
+            // 2. Update Bullets
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.mesh.position.addScaledVector(b.dir, 1.5);
+                b.life--;
+
+                // Check Enemy Hit
+                let hit = false;
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const e = enemies[j];
+                    const dist = b.mesh.position.distanceTo(e.mesh.position.clone().add(new THREE.Vector3(0, 1, 0)));
+                    if (dist < 1.3) {
+                        playSound('hit');
+                        e.hp--;
+                        hit = true;
+                        if (e.hp <= 0) {
+                            scene.remove(e.mesh);
+                            enemies.splice(j, 1);
+                            kills++;
+                            document.getElementById('killCount').innerText = kills;
+                            if (kills % 5 === 0) {
+                                wave++;
+                                document.getElementById('waveCount').innerText = wave;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                if (hit || b.life <= 0) {
+                    scene.remove(b.mesh);
+                    bullets.splice(i, 1);
+                }
+            }
+
+            // 3. Update Enemies
+            const enemySpeed = 0.06 + (wave * 0.012);
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                e.mesh.lookAt(camera.position.x, 0, camera.position.z);
+                const dirToPlayer = new THREE.Vector3().subVectors(camera.position, e.mesh.position);
+                dirToPlayer.y = 0;
+                const dist = dirToPlayer.length();
+                dirToPlayer.normalize();
+
+                if (dist > 1.8) {
+                    e.mesh.position.addScaledVector(dirToPlayer, enemySpeed);
+                } else {
+                    // Enemy attacks player
+                    hp -= 0.4;
+                    updateHP();
+                    if (hp <= 0) {
+                        endGame();
+                        return;
+                    }
+                }
+            }
+
+            // 4. Spawn Enemies
+            spawnTimer++;
+            const spawnRate = Math.max(45, 130 - (wave * 15));
+            if (spawnTimer >= spawnRate && enemies.length < 10) {
+                spawnEnemy();
+                spawnTimer = 0;
+            }
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(updateGame);
+        }
+
+        function updateHP() {
+            const displayHp = Math.max(0, Math.ceil(hp));
+            document.getElementById('hpText').innerText = displayHp;
+            const fill = document.getElementById('hpFill');
+            fill.style.width = displayHp + '%';
+            fill.style.background = displayHp > 50 ? '#22c55e' : (displayHp > 25 ? '#eab308' : '#ef4444');
+        }
+
+        function startGame() {
+            document.getElementById('lobbyScreen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            if (!scene) init3D();
+            resetStats();
+            isPlaying = true;
+            spawnEnemy();
+            spawnEnemy();
+            updateGame();
+        }
+
+        function resetStats() {
+            hp = 100;
+            kills = 0;
+            wave = 1;
+            updateHP();
+            document.getElementById('killCount').innerText = '0';
+            document.getElementById('waveCount').innerText = '1';
+            camera.position.set(0, 1.8, 0);
+            camera.rotation.set(0, 0, 0);
+
+            enemies.forEach(e => scene.remove(e.mesh));
+            enemies = [];
+            bullets.forEach(b => scene.remove(b.mesh));
+            bullets = [];
+        }
+
+        function endGame() {
+            isPlaying = false;
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            document.getElementById('finalKills').innerText = kills;
+            document.getElementById('finalWave').innerText = wave;
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            resetStats();
+            isPlaying = true;
+            spawnEnemy();
+            updateGame();
+        }
+
+        // --- TOUCH & KEYBOARD CONTROLS BINDING ---
+        function bindButton(id, stateKey) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); moveState[stateKey] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); moveState[stateKey] = false; });
+            btn.addEventListener('mousedown', () => moveState[stateKey] = true);
+            btn.addEventListener('mouseup', () => moveState[stateKey] = false);
+            btn.addEventListener('mouseleave', () => moveState[stateKey] = false);
+        }
+
+        bindButton('btnUp', 'forward');
+        bindButton('btnDown', 'backward');
+        bindButton('btnLeft', 'left');
+        bindButton('btnRight', 'right');
+        bindButton('btnTurnLeft', 'turnLeft');
+        bindButton('btnTurnRight', 'turnRight');
+
+        // Keyboard support for PC testing
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'ArrowUp') moveState.forward = true;
+            if (e.key === 's' || e.key === 'ArrowDown') moveState.backward = true;
+            if (e.key === 'a') moveState.left = true;
+            if (e.key === 'd') moveState.right = true;
+            if (e.key === 'ArrowLeft') moveState.turnLeft = true;
+            if (e.key === 'ArrowRight') moveState.turnRight = true;
+            if (e.code === 'Space') shoot();
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'ArrowUp') moveState.forward = false;
+            if (e.key === 's' || e.key === 'ArrowDown') moveState.backward = false;
+            if (e.key === 'a') moveState.left = false;
+            if (e.key === 'd') moveState.right = false;
+            if (e.key === 'ArrowLeft') moveState.turnLeft = false;
+            if (e.key === 'ArrowRight') moveState.turnRight = false;
+        });
+    </script>
+</body>
+</html>
