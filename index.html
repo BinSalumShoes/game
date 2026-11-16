@@ -16,7 +16,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #080b11;
+            background-color: #05080f;
             color: #ffffff;
             display: flex;
             justify-content: center;
@@ -37,7 +37,6 @@
             border: 2px solid #334155;
         }
 
-        /* --- SCREENS --- */
         .screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -56,7 +55,7 @@
             font-size: 32px;
             font-weight: 900;
             letter-spacing: 2px;
-            background: linear-gradient(to right, #38bdf8, #eab308, #ef4444);
+            background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 5px;
@@ -70,8 +69,8 @@
         }
 
         .btn {
-            background: #38bdf8;
-            color: #0f172a;
+            background: #22c55e;
+            color: #05080f;
             border: none;
             padding: 14px 28px;
             font-size: 16px;
@@ -81,15 +80,14 @@
             margin: 8px 0;
             width: 100%;
             max-width: 260px;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
             transition: 0.15s;
         }
         .btn:active { transform: scale(0.96); }
         .btn-gold { background: #eab308; color: #000; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3); }
         .btn-danger { background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
 
-        /* --- HUD & GAME BOARD --- */
-        #gameScreen { background: #080b11; justify-content: flex-start; padding: 15px; }
+        #gameScreen { background: #05080f; justify-content: flex-start; padding: 15px; }
         .hud-bar {
             width: 100%;
             display: flex;
@@ -106,13 +104,12 @@
         canvas {
             background: #020617;
             border-radius: 12px;
-            border: 2px solid #334155;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            border: 2px solid #22c55e;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px rgba(34, 197, 94, 0.2);
             display: block;
             margin: 0 auto;
         }
 
-        /* --- CONTROLS --- */
         .controls {
             width: 100%;
             display: grid;
@@ -133,33 +130,34 @@
             align-items: center;
             cursor: pointer;
         }
-        .ctrl-btn:active { background: #38bdf8; color: #0f172a; }
+        .ctrl-btn:active { background: #22c55e; color: #0f172a; }
         .btn-up { grid-column: 2; grid-row: 1; }
         .btn-left { grid-column: 1; grid-row: 2; }
         .btn-down { grid-column: 2; grid-row: 2; }
         .btn-right { grid-column: 3; grid-row: 2; }
 
-        /* --- SKINS & SHOP --- */
         .skins-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             width: 100%;
-            max-width: 280px;
-            margin: 15px 0;
+            max-width: 300px;
+            max-height: 320px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding-right: 5px;
         }
         .skin-card {
             background: #1e293b;
             border: 2px solid #334155;
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             cursor: pointer;
             text-align: center;
         }
-        .skin-card.selected { border-color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
-        .skin-preview { width: 30px; height: 10px; border-radius: 5px; margin: 5px auto; }
+        .skin-card.selected { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .skin-preview { width: 35px; height: 12px; border-radius: 6px; margin: 5px auto; }
 
-        /* --- LEADERBOARD --- */
         .lb-list {
             width: 100%;
             max-width: 280px;
@@ -177,7 +175,6 @@
             border-bottom: 1px solid #334155;
             font-size: 13px;
         }
-        .lb-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -189,7 +186,7 @@
             <div class="logo">VIPER SNAKE</div>
             <div class="slogan">Rule the Battle. Fear the Viper.</div>
             
-            <div style="font-size: 14px; color: #eab308; margin-bottom: 15px;">💰 Coins: <span id="menuCoins">0</span></div>
+            <div style="font-size: 14px; color: #eab308; margin-bottom: 15px;">💰 Coins: <span id="menuCoins">100</span></div>
             
             <button class="btn btn-gold" onclick="openModeSelect()">PLAY GAME</button>
             <button class="btn" onclick="openSkins()">SNAKE SKINS</button>
@@ -210,11 +207,11 @@
             <div class="hud-bar">
                 <div>Score: <span id="scoreVal">0</span></div>
                 <div>💰 <span id="coinVal">0</span></div>
-                <div id="powerupStatus" style="color: #eab308; font-size: 12px;"></div>
+                <div id="powerupStatus" style="color: #eab308; font-size: 11px;"></div>
                 <button onclick="pauseGame()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">⏸️</button>
             </div>
 
-            <canvas id="gameCanvas" width="360" height="420"></canvas>
+            <canvas id="gameCanvas" width="360" height="400"></canvas>
 
             <div class="controls">
                 <button class="ctrl-btn btn-up" onclick="setDir(0, -1)">▲</button>
@@ -227,15 +224,15 @@
         <!-- 4. SKINS SHOP -->
         <div id="skinsScreen" class="screen hidden">
             <div class="logo">SNAKE SKINS</div>
-            <div style="font-size: 14px; color: #eab308; margin-bottom: 10px;">Coins: <span id="shopCoins">0</span></div>
+            <div style="font-size: 13px; color: #eab308; margin-bottom: 5px;">Coins: <span id="shopCoins">0</span></div>
             
             <div class="skins-grid" id="skinsContainer"></div>
-            <button class="btn" style="margin-top: 15px;" onclick="backToMenu()">Back</button>
+            <button class="btn" style="margin-top: 10px;" onclick="backToMenu()">Back</button>
         </div>
 
         <!-- 5. LEADERBOARD -->
         <div id="leaderboardScreen" class="screen hidden">
-            <div class="logo">GLOBAL LEADERBOARD</div>
+            <div class="logo">LEADERBOARD</div>
             <div class="lb-list" id="leaderboardList"></div>
             <button class="btn" onclick="backToMenu()">Back</button>
         </div>
@@ -243,7 +240,7 @@
         <!-- 6. GAME OVER -->
         <div id="gameOverScreen" class="screen hidden">
             <div class="logo" style="color: #ef4444;">GAME OVER</div>
-            <p style="margin: 10px 0; color: #cbd5e1;">Final Score: <span id="finalScore" style="color:#38bdf8; font-weight:bold;">0</span></p>
+            <p style="margin: 10px 0; color: #cbd5e1;">Final Score: <span id="finalScore" style="color:#22c55e; font-weight:bold;">0</span></p>
             <p style="margin-bottom: 20px; color: #eab308;">Coins Earned: +<span id="earnedCoins">0</span></p>
             <button class="btn btn-gold" onclick="restartGame()">PLAY AGAIN</button>
             <button class="btn" onclick="backToMenu()">Main Menu</button>
@@ -254,22 +251,23 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const GRID_SIZE = 15;
+        const GRID_SIZE = 16;
         const TILE_COUNT_X = canvas.width / GRID_SIZE;
         const TILE_COUNT_Y = canvas.height / GRID_SIZE;
 
-        // Player Data & LocalStorage
         let playerData = JSON.parse(localStorage.getItem('viper_snake_data')) || {
             coins: 100,
-            selectedSkin: 'neon',
-            unlockedSkins: ['neon']
+            selectedSkin: 'viper',
+            unlockedSkins: ['viper']
         };
 
         const skins = [
-            { id: 'neon', name: 'Neon Blue', color: '#38bdf8', price: 0 },
-            { id: 'gold', name: 'Golden Viper', color: '#eab308', price: 50 },
-            { id: 'fire', name: 'Magma Red', color: '#ef4444', price: 100 },
-            { id: 'toxic', name: 'Toxic Green', color: '#22c55e', price: 150 }
+            { id: 'viper', name: 'VIPER (Classic)', primary: '#15803d', secondary: '#22c55e', eyeColor: '#4ade80', price: 0 },
+            { id: 'inferno', name: 'INFERNO', primary: '#b91c1c', secondary: '#ef4444', eyeColor: '#fca5a5', price: 50 },
+            { id: 'gold', name: 'GOLD VIPER', primary: '#a16207', secondary: '#eab308', eyeColor: '#fef08a', price: 100 },
+            { id: 'frost', name: 'FROST VIPER', primary: '#0369a1', secondary: '#38bdf8', eyeColor: '#bae6fd', price: 150 },
+            { id: 'shadow', name: 'SHADOW VIPER', primary: '#581c87', secondary: '#a855f7', eyeColor: '#e9d5ff', price: 200 },
+            { id: 'arctic', name: 'ARCTIC VIPER', primary: '#334155', secondary: '#94a3b8', eyeColor: '#ffffff', price: 250 }
         ];
 
         let globalLeaderboard = [
@@ -310,20 +308,14 @@
         }
 
         function openModeSelect() { showScreen('modeScreen'); }
-        
-        function backToMenu() { 
-            clearInterval(gameInterval); 
-            updateUI(); 
-            showScreen('menuScreen'); 
-        }
+        function backToMenu() { clearInterval(gameInterval); updateUI(); showScreen('menuScreen'); }
 
-        // --- ANDROID / PHONE BACK BUTTON HANDLER ---
-        window.addEventListener('popstate', (event) => {
-            event.preventDefault();
+        // Android Phone Back Button Support
+        window.addEventListener('popstate', (e) => {
+            e.preventDefault();
             backToMenu();
             history.pushState(null, null, window.location.href);
         });
-        // Push state initially so back button works smoothly
         history.pushState(null, null, window.location.href);
 
         function openSkins() {
@@ -336,10 +328,10 @@
                 const card = document.createElement('div');
                 card.className = `skin-card ${isSelected ? 'selected' : ''}`;
                 card.innerHTML = `
-                    <div style="font-size:12px; font-weight:bold;">${skin.name}</div>
-                    <div class="skin-preview" style="background:${skin.color};"></div>
-                    <div style="font-size:11px; color:${isUnlocked ? '#22c55e' : '#eab308'};">
-                        ${isUnlocked ? (isSelected ? 'Selected' : 'Equip') : '💰 ' + skin.price}
+                    <div style="font-size:11px; font-weight:bold;">${skin.name}</div>
+                    <div class="skin-preview" style="background: linear-gradient(to right, ${skin.primary}, ${skin.secondary});"></div>
+                    <div style="font-size:10px; color:${isUnlocked ? '#22c55e' : '#eab308'};">
+                        ${isUnlocked ? (isSelected ? 'Equipped' : 'Equip') : '💰 ' + skin.price}
                     </div>
                 `;
                 card.onclick = () => {
@@ -368,22 +360,17 @@
             globalLeaderboard.sort((a, b) => b.score - a.score).forEach((item, index) => {
                 const row = document.createElement('div');
                 row.className = 'lb-item';
-                row.innerHTML = `<span>#${index+1} ${item.name}</span> <strong style="color:#38bdf8;">${item.score}</strong>`;
+                row.innerHTML = `<span>#${index+1} ${item.name}</span> <strong style="color:#22c55e;">${item.score}</strong>`;
                 list.appendChild(row);
             });
             showScreen('leaderboardScreen');
         }
 
-        // --- GAME LOGIC ---
         function startGame(mode) {
             currentMode = mode;
             showScreen('gameScreen');
             
-            snake = [
-                { x: 10, y: 10 },
-                { x: 9, y: 10 },
-                { x: 8, y: 10 }
-            ];
+            snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
             dx = 1; dy = 0;
             nextDx = 1; nextDy = 0;
             score = 0;
@@ -395,7 +382,6 @@
 
             document.getElementById('scoreVal').innerText = score;
             document.getElementById('coinVal').innerText = sessionCoins;
-            document.getElementById('powerupStatus').innerText = '';
 
             if (mode === 'survival') {
                 for (let i = 0; i < 6; i++) {
@@ -404,7 +390,7 @@
             } else if (mode === 'battle') {
                 enemies.push({
                     body: [{ x: 5, y: 5 }, { x: 5, y: 6 }, { x: 5, y: 7 }],
-                    dx: 0, dy: -1, color: '#ef4444'
+                    dx: 0, dy: -1, skin: skins[1]
                 });
             }
 
@@ -430,7 +416,6 @@
         function spawnFood() {
             food.x = Math.floor(Math.random() * TILE_COUNT_X);
             food.y = Math.floor(Math.random() * TILE_COUNT_Y);
-            
             const rand = Math.random();
             if (rand < 0.5) food.type = 'normal';
             else if (rand < 0.7) food.type = 'coin';
@@ -451,10 +436,7 @@
                     activePowerup = null;
                     head.x = (head.x + TILE_COUNT_X) % TILE_COUNT_X;
                     head.y = (head.y + TILE_COUNT_Y) % TILE_COUNT_Y;
-                } else {
-                    gameOver();
-                    return;
-                }
+                } else { gameOver(); return; }
             }
 
             for (let part of snake) {
@@ -483,21 +465,11 @@
             snake.unshift(head);
 
             if (head.x === food.x && head.y === food.y) {
-                if (food.type === 'coin') {
-                    sessionCoins += 5;
-                } else if (food.type === 'speed') {
-                    activePowerup = 'speed';
-                    powerupTimer = 30;
-                } else if (food.type === 'shield') {
-                    activePowerup = 'shield';
-                    powerupTimer = 40;
-                } else if (food.type === 'magnet') {
-                    activePowerup = 'magnet';
-                    powerupTimer = 35;
-                } else {
-                    score += 10;
-                    sessionCoins += 1;
-                }
+                if (food.type === 'coin') sessionCoins += 5;
+                else if (food.type === 'speed') { activePowerup = 'speed'; powerupTimer = 30; }
+                else if (food.type === 'shield') { activePowerup = 'shield'; powerupTimer = 40; }
+                else if (food.type === 'magnet') { activePowerup = 'magnet'; powerupTimer = 35; }
+                else { score += 10; sessionCoins += 1; }
                 document.getElementById('scoreVal').innerText = score;
                 document.getElementById('coinVal').innerText = sessionCoins;
                 spawnFood();
@@ -508,48 +480,23 @@
             if (activePowerup) {
                 powerupTimer--;
                 document.getElementById('powerupStatus').innerText = `${activePowerup.toUpperCase()} (${powerupTimer})` ;
-                if (powerupTimer <= 0) {
-                    activePowerup = null;
-                    document.getElementById('powerupStatus').innerText = '';
-                }
-            }
-
-            if (currentMode === 'battle') {
-                enemies.forEach(enemy => {
-                    if (enemy.body[0].x < food.x) enemy.dx = 1, enemy.dy = 0;
-                    else if (enemy.body[0].x > food.x) enemy.dx = -1, enemy.dy = 0;
-                    else if (enemy.body[0].y < food.y) enemy.dx = 0, enemy.dy = 1;
-                    else if (enemy.body[0].y > food.y) enemy.dx = 0, enemy.dy = -1;
-
-                    const eHead = { x: enemy.body[0].x + enemy.dx, y: enemy.body[0].y + enemy.dy };
-                    enemy.body.unshift(eHead);
-                    enemy.body.pop();
-
-                    for (let part of enemy.body) {
-                        if (head.x === part.x && head.y === part.y) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                });
+                if (powerupTimer <= 0) { activePowerup = null; document.getElementById('powerupStatus').innerText = ''; }
             }
 
             draw();
         }
 
-        // --- REALISTIC SNAKE DRAWING FUNCTION ---
-        function drawRealisticSnake(bodySegments, skinColor) {
+        // --- REALISTIC VIPER SNAKE GRAPHICS ENGINE ---
+        function drawRealisticViper(bodySegments, skin) {
             bodySegments.forEach((part, index) => {
                 const x = part.x * GRID_SIZE + GRID_SIZE / 2;
                 const y = part.y * GRID_SIZE + GRID_SIZE / 2;
-                const radius = GRID_SIZE / 2 - 1;
+                const radius = GRID_SIZE / 2 - 0.5;
 
                 if (index === 0) {
-                    // --- SNAKE HEAD ---
+                    // --- VIPER HEAD ---
                     ctx.save();
                     ctx.translate(x, y);
-                    
-                    // Rotate head based on direction
                     let angle = 0;
                     if (dx === 1) angle = 0;
                     else if (dx === -1) angle = Math.PI;
@@ -557,45 +504,54 @@
                     else if (dy === -1) angle = -Math.PI / 2;
                     ctx.rotate(angle);
 
-                    // Head base shape
-                    ctx.fillStyle = skinColor;
+                    // Head Hood
+                    ctx.fillStyle = skin.primary;
                     ctx.beginPath();
-                    ctx.ellipse(0, 0, radius, radius - 1, 0, 0, Math.PI * 2);
+                    ctx.ellipse(0, 0, radius + 1, radius, 0, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Eyes
-                    ctx.fillStyle = '#ffffff';
+                    // Glowing Fierce Eyes
+                    ctx.fillStyle = skin.eyeColor;
+                    ctx.shadowColor = skin.eyeColor;
+                    ctx.shadowBlur = 8;
                     ctx.beginPath();
-                    ctx.arc(3, -4, 2.5, 0, Math.PI * 2);
-                    ctx.arc(3, 4, 2.5, 0, Math.PI * 2);
+                    ctx.arc(3, -4, 2.2, 0, Math.PI * 2);
+                    ctx.arc(3, 4, 2.2, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.shadowBlur = 0; // reset shadow
 
-                    // Pupils
+                    // Slit Pupil
                     ctx.fillStyle = '#000000';
                     ctx.beginPath();
-                    ctx.arc(4, -4, 1, 0, Math.PI * 2);
-                    ctx.arc(4, 4, 1, 0, Math.PI * 2);
+                    ctx.arc(3.5, -4, 0.9, 0, Math.PI * 2);
+                    ctx.arc(3.5, 4, 0.9, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Tongue flick
+                    // Poisonous Fangs & Tongue
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(radius, -3); ctx.lineTo(radius + 3, -5);
+                    ctx.moveTo(radius, 3); ctx.lineTo(radius + 3, 5);
+                    ctx.stroke();
+
                     ctx.strokeStyle = '#ef4444';
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    ctx.moveTo(radius, 0);
-                    ctx.lineTo(radius + 4, 0);
+                    ctx.moveTo(radius + 1, 0); ctx.lineTo(radius + 6, 0);
                     ctx.stroke();
 
                     ctx.restore();
                 } else {
-                    // --- SNAKE BODY SEGMENTS (SMOOTH & ORGANIC) ---
-                    ctx.fillStyle = skinColor;
+                    // --- SCALED VIPER BODY ---
+                    ctx.fillStyle = index % 2 === 0 ? skin.primary : skin.secondary;
                     ctx.beginPath();
-                    ctx.arc(x, y, radius - 1, 0, Math.PI * 2);
+                    ctx.arc(x, y, radius - 0.5, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Add subtle inner texture ring for realism
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-                    ctx.lineWidth = 1.5;
+                    // Scale pattern line
+                    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
             });
@@ -605,7 +561,6 @@
             ctx.fillStyle = '#020617';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Obstacles
             if (currentMode === 'survival') {
                 ctx.fillStyle = '#64748b';
                 obstacles.forEach(obs => {
@@ -613,7 +568,6 @@
                 });
             }
 
-            // Draw Food / Powerup
             if (food.type === 'normal') ctx.fillStyle = '#ef4444';
             else if (food.type === 'coin') ctx.fillStyle = '#eab308';
             else if (food.type === 'speed') ctx.fillStyle = '#38bdf8';
@@ -624,14 +578,12 @@
             ctx.arc(food.x * GRID_SIZE + GRID_SIZE/2, food.y * GRID_SIZE + GRID_SIZE/2, GRID_SIZE/2 - 2, 0, Math.PI * 2);
             ctx.fill();
 
-            // Draw Player Snake with Realistic Appearance
-            const currentSkinObj = skins.find(s => s.id === playerData.selectedSkin) || skins[0];
-            drawRealisticSnake(snake, currentSkinObj.color);
+            const currentSkin = skins.find(s => s.id === playerData.selectedSkin) || skins[0];
+            drawRealisticViper(snake, currentSkin);
 
-            // Draw Enemies
             if (currentMode === 'battle') {
                 enemies.forEach(enemy => {
-                    drawRealisticSnake(enemy.body, enemy.color);
+                    drawRealisticViper(enemy.body, enemy.skin);
                 });
             }
         }
@@ -647,13 +599,8 @@
             showScreen('gameOverScreen');
         }
 
-        function restartGame() {
-            startGame(currentMode);
-        }
-
-        function pauseGame() {
-            isPaused = !isPaused;
-        }
+        function restartGame() { startGame(currentMode); }
+        function pauseGame() { isPaused = !isPaused; }
     </script>
 </body>
 </html>
